@@ -523,7 +523,7 @@ padding: 14px 14px;
 .converter-overlay {
 position: fixed;
 inset: 0;
-background: rgba(0,0,0,0.4);
+background: rgba(0,0,0,0.25);
 z-index: 300;
 cursor: pointer;
 }
@@ -626,7 +626,7 @@ color: #d94a4a;
 }
 
 .converter-subtitle {
-font-size: 12px;
+font-size: 11px;
 color: var(--text-muted);
 margin-bottom: 24px;
 }
@@ -653,7 +653,7 @@ text-transform: uppercase;
 
 .tier-row {
 display: grid;
-grid-template-columns: 40px 1fr 80px 80px 100px;
+grid-template-columns: 40px minmax(0, 1fr) 55px 70px minmax(60px, 100px);
 align-items: center;
 gap: 10px;
 padding: 8px 0;
@@ -700,6 +700,7 @@ font-family: 'Chakra Petch', sans-serif;
 font-size: 13px;
 color: var(--text-secondary);
 text-align: center;
+white-space: nowrap;
 }
 
 .tier-input {
@@ -727,15 +728,23 @@ font-family: 'Chakra Petch', sans-serif;
 font-size: 13px;
 font-weight: 700;
 text-align: center;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+min-width: 0;
 }
 
 .tier-result.surplus { color: var(--rarity-2); }
 .tier-result.deficit { color: #d94a4a; }
 .tier-result.exact { color: var(--text-muted); }
+.tier-result.converted { font-weight: 700; }
+.tier-result.rarity-3-text { color: var(--rarity-3); }
+.tier-result.rarity-4-text { color: var(--rarity-4); }
+.tier-result.rarity-5-text { color: var(--rarity-5); }
 
 .tier-header {
 display: grid;
-grid-template-columns: 40px 1fr 80px 80px 100px;
+grid-template-columns: 40px minmax(0, 1fr) 55px 70px minmax(60px, 100px);
 gap: 10px;
 padding-bottom: 8px;
 margin-bottom: 4px;

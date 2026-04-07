@@ -301,15 +301,15 @@ function computeConversion(tiers, owned) {
     const have = (owned[tier.key] || 0) + carry;
     const need = tier.needed;
     const diff = have - need;
+    const isTopTier = i === sortedTiers.length - 1;
+    const nextQuality = isTopTier ? null : sortedTiers[i + 1].qualityId;
 
     if (diff >= 0) {
-      // Surplus — can carry up
       carry = Math.floor(diff / 3);
-      results.push({ ...tier, have, diff, status: diff === 0 ? "exact" : "surplus", carried: carry });
+      results.push({ ...tier, have, diff, status: diff === 0 ? "exact" : "surplus", carried: carry, isTopTier, nextQuality });
     } else {
-      // Deficit
       carry = 0;
-      results.push({ ...tier, have, diff, status: "deficit", carried: 0 });
+      results.push({ ...tier, have, diff, status: "deficit", carried: 0, isTopTier, nextQuality });
     }
   });
 
@@ -321,6 +321,21 @@ function ConversionCalculator({ combinedMats, itemMap, owned, setOwned, isOpen, 
   const [panelWidth, setPanelWidth] = useState(520);
   const [dragging, setDragging] = useState(false);
   const panelRef = useRef(null);
+
+  // Prevent scroll bleed-through when hovering panel
+  useEffect(() => {
+    if (!isOpen) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const handleWheel = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = panel;
+      const atTop = scrollTop === 0 && e.deltaY < 0;
+      const atBottom = scrollTop + clientHeight >= scrollHeight && e.deltaY > 0;
+      if (atTop || atBottom) e.preventDefault();
+    };
+    panel.addEventListener("wheel", handleWheel, { passive: false });
+    return () => panel.removeEventListener("wheel", handleWheel);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!dragging) return;
@@ -340,6 +355,14 @@ function ConversionCalculator({ combinedMats, itemMap, owned, setOwned, isOpen, 
       document.body.style.userSelect = "";
     };
   }, [dragging]);
+
+  // Close on Esc key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
 
   if (families.length === 0 || !isOpen) return null;
 
@@ -391,16 +414,24 @@ function ConversionCalculator({ combinedMats, itemMap, owned, setOwned, isOpen, 
                     placeholder="0"
                     onChange={e => updateOwned(r.key, e.target.value)}
                   />
-                  <div className={`tier-result ${r.status}`}>
-                    {r.status === "surplus" && `+${r.diff} surplus`}
+                  <div className={`tier-result ${r.status === "surplus" ? (r.isTopTier ? "surplus" : `converted rarity-${r.nextQuality}-text`) : r.status}`}>
+                    {r.status === "surplus" && r.isTopTier && `+${r.diff} surplus`}
+                    {r.status === "surplus" && !r.isTopTier && `${r.carried} converted`}
                     {r.status === "deficit" && `${r.diff} short`}
                     {r.status === "exact" && "Exact"}
                   </div>
                 </div>
               ))}
-              <div className={`family-summary ${allMet ? "ok" : "short"}`}>
-                {allMet ? "✓ Sufficient (with conversions)" : "✗ Not enough — farm more materials"}
-              </div>
+              {(() => {
+                const anyConverted = results.some(r => r.status === "surplus" && r.carried > 0);
+                return (
+                  <div className={`family-summary ${allMet ? "ok" : "short"}`}>
+                    {allMet && anyConverted && "✓ Sufficient (with conversions)"}
+                    {allMet && !anyConverted && "✓ Sufficient"}
+                    {!allMet && "✗ Not enough — farm more materials"}
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
