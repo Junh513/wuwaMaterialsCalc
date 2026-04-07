@@ -190,7 +190,7 @@ function MaterialList({ groups, useGrid }) {
   });
 }
 
-function SearchDropdown({ items, placeholder, onSelect, getIcon, getMeta }) {
+function SearchDropdown({ items, placeholder, onSelect, getIcon, getMeta, getQuality }) {
   const [search, setSearch] = useState("");
   const [showDrop, setShowDrop] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
@@ -248,7 +248,7 @@ function SearchDropdown({ items, placeholder, onSelect, getIcon, getMeta }) {
               onClick={() => { onSelect(item); setSearch(""); setShowDrop(false); setActiveIdx(-1); }}
               onMouseEnter={() => setActiveIdx(i)}
             >
-              <img src={getIcon(item)} alt="" />
+              <img src={getIcon(item)} alt="" className={`icon-glow-${getQuality ? getQuality(item) : 5}`} />
               <div>
                 <div className="d-name">{item.Name}</div>
                 <div className="d-meta">{getMeta(item)}</div>
@@ -533,12 +533,13 @@ function App() {
               onSelect={selectChar}
               getIcon={c => c.RoleHeadIcon}
               getMeta={c => `${c.Element?.Name} · ${c.WeaponType?.Name}`}
+              getQuality={c => c.QualityId}
             />
           )}
 
           {selectedChar && (
             <div className="selected-banner">
-              <img src={selectedChar.RoleHeadIcon} alt="" />
+              <img src={selectedChar.RoleHeadIcon} alt="" className={`icon-glow-${selectedChar.QualityId}`} />
               <div className="info">
                 <h3>{selectedChar.Name}</h3>
                 <span>{selectedChar.Element?.Name} · {selectedChar.WeaponType?.Name}</span>
@@ -608,12 +609,13 @@ function App() {
               onSelect={selectWeapon}
               getIcon={w => w.Icon}
               getMeta={w => w.TypeName}
+              getQuality={w => w.QualityId}
             />
           )}
 
           {selectedWeapon && (
             <div className="selected-banner">
-              <img src={selectedWeapon.Icon} alt="" />
+              <img src={selectedWeapon.Icon} alt="" className="icon-glow-5" />
               <div className="info">
                 <h3>{selectedWeapon.Name}</h3>
                 <span>5★ {selectedWeapon.TypeName}</span>

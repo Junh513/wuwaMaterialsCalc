@@ -166,9 +166,37 @@ border-radius: 8px;
 margin-bottom: 16px;
 }
 
-.selected-banner img { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); }
+.selected-banner img { width: 44px; height: 44px; border-radius: 50%; }
 .selected-banner .info h3 { font-family: 'Chakra Petch', sans-serif; font-size: 17px; font-weight: 700; }
 .selected-banner .info span { font-size: 12px; color: var(--text-secondary); }
+
+/* Icon rarity glow */
+.icon-glow-5 {
+  border: 2px solid var(--rarity-5) !important;
+  box-shadow: 0 0 10px rgba(212,166,49,0.5), 0 0 20px rgba(212,166,49,0.2);
+}
+
+.icon-glow-4 {
+  border: 2px solid var(--rarity-4) !important;
+  box-shadow: 0 0 10px rgba(176,110,201,0.5), 0 0 20px rgba(176,110,201,0.2);
+}
+
+.icon-glow-3 {
+  border: 2px solid var(--rarity-3) !important;
+  box-shadow: 0 0 10px rgba(74,155,217,0.5), 0 0 20px rgba(74,155,217,0.2);
+}
+
+.icon-glow-2 {
+  border: 2px solid var(--rarity-2) !important;
+  box-shadow: 0 0 10px rgba(77,184,112,0.5), 0 0 20px rgba(77,184,112,0.2);
+}
+
+.dropdown-item .icon-glow-5,
+.dropdown-item .icon-glow-4,
+.dropdown-item .icon-glow-3,
+.dropdown-item .icon-glow-2 {
+  border-radius: 50%;
+}
 
 .clear-btn {
 margin-left: auto;
