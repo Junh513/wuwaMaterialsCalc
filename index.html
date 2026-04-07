@@ -471,6 +471,11 @@ function App() {
     setSkillLevels(Object.fromEntries(SKILL_ORDER.map(s => [s, 10])));
     setAscCollapsed(false);
     setSkillCollapsed(false);
+    // Clear weapon if type doesn't match
+    if (selectedWeapon && selectedWeapon.TypeName !== char.WeaponType?.Name) {
+      setSelectedWeapon(null);
+      setWeaponRawData(null);
+    }
     try {
       const data = await fetch(`${API}/character/${char.Id}`).then(r => r.json());
       setCharRawData(data);
@@ -604,7 +609,7 @@ function App() {
 
           {!selectedWeapon && (
             <SearchDropdown
-              items={weapons}
+              items={selectedChar ? weapons.filter(w => w.TypeName === selectedChar.WeaponType?.Name) : weapons}
               placeholder="Search 5★ weapon..."
               onSelect={selectWeapon}
               getIcon={w => w.Icon}
