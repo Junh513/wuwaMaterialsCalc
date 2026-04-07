@@ -441,28 +441,90 @@ function App() {
   const [owned, setOwned] = useState({});
   const [converterOpen, setConverterOpen] = useState(false);
 
-  // Load initial data
+  // Save/restore
+  const [saveEnabled, setSaveEnabled] = useState(() => {
+    try { return localStorage.getItem('wuwa_save_enabled') === 'true'; } catch { return false; }
+  });
+  const restoredRef = useRef(false);
+
+  // Load initial data + restore saved selections
   useEffect(() => {
     Promise.all([
       fetch(`${API}/character`).then(r => r.json()),
       fetch(`${API}/item`).then(r => r.json()),
       fetch(`${API}/weapon`).then(r => r.json())
-    ]).then(([charData, itemData, weaponData]) => {
+    ]).then(async ([charData, itemData, weaponData]) => {
       const list = charData.roleList || charData;
       const ROVER_IDS = new Set([1502, 1604, 1408]);
       const deduped = (Array.isArray(list) ? list : []).filter(c =>
         !c.Name.startsWith("Rover:") || ROVER_IDS.has(c.Id)
       );
-      setChars(deduped.sort((a,b) => a.Name.localeCompare(b.Name)));
+      const sortedChars = deduped.sort((a,b) => a.Name.localeCompare(b.Name));
+      setChars(sortedChars);
       const items = itemData.itemList || itemData;
       const map = {};
       if (Array.isArray(items)) items.forEach(i => { map[i.Id] = i; });
       setItemMap(map);
       const wlist = weaponData.weapons || [];
-      setWeapons(wlist.filter(w => w.QualityId >= 4).sort((a,b) => a.Name.localeCompare(b.Name)));
+      const sortedWeapons = wlist.filter(w => w.QualityId >= 4).sort((a,b) => a.Name.localeCompare(b.Name));
+      setWeapons(sortedWeapons);
+
+      // Restore saved state
+      try {
+        if (localStorage.getItem('wuwa_save_enabled') === 'true') {
+          const saved = JSON.parse(localStorage.getItem('wuwa_saved_state') || '{}');
+          if (saved.ownedMats) setOwned(saved.ownedMats);
+          if (saved.charId) {
+            const char = sortedChars.find(c => c.Id === saved.charId);
+            if (char) {
+              setSelectedChar(char);
+              if (saved.charLevel) setCharLevel(saved.charLevel);
+              if (saved.skillLevels) setSkillLevels(saved.skillLevels);
+              try {
+                const cData = await fetch(`${API}/character/${char.Id}`).then(r => r.json());
+                setCharRawData(cData);
+              } catch {}
+            }
+          }
+          if (saved.weaponId) {
+            const wpn = sortedWeapons.find(w => w.Id === saved.weaponId);
+            if (wpn) {
+              setSelectedWeapon(wpn);
+              if (saved.weaponLevel) setWeaponLevel(saved.weaponLevel);
+              try {
+                const wData = await fetch(`${API}/weapon/${wpn.Id}`).then(r => r.json());
+                setWeaponRawData(wData);
+              } catch {}
+            }
+          }
+        }
+      } catch {}
+
+      restoredRef.current = true;
       setLoading(false);
     }).catch(() => { setError("Failed to load data."); setLoading(false); });
   }, []);
+
+  // Save state when relevant data changes
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    try {
+      localStorage.setItem('wuwa_save_enabled', saveEnabled ? 'true' : 'false');
+      if (saveEnabled) {
+        const state = {
+          charId: selectedChar?.Id || null,
+          charLevel,
+          skillLevels,
+          weaponId: selectedWeapon?.Id || null,
+          weaponLevel,
+          ownedMats: owned
+        };
+        localStorage.setItem('wuwa_saved_state', JSON.stringify(state));
+      } else {
+        localStorage.removeItem('wuwa_saved_state');
+      }
+    } catch {}
+  }, [saveEnabled, selectedChar, charLevel, skillLevels, selectedWeapon, weaponLevel, owned]);
 
   // Fetch character
   const selectChar = async (char) => {
@@ -691,6 +753,15 @@ function App() {
           <MaterialList groups={combinedGroups} useGrid />
         </div>
       )}
+
+      {/* SAVE TOGGLE */}
+      <div className="save-toggle-fixed">
+        <label className="toggle-switch" title={saveEnabled ? "Local save is ON — your selections persist" : "Local save is OFF"}>
+          <input type="checkbox" checked={saveEnabled} onChange={() => setSaveEnabled(p => !p)} />
+          <span className="toggle-slider save-slider"></span>
+          <span className="toggle-label save-label">{saveEnabled ? "Save ON" : "Save OFF"}</span>
+        </label>
+      </div>
     </div>
   );
 }
