@@ -59,6 +59,34 @@ margin-bottom: 6px;
 
 .header p { font-size: 14px; color: var(--text-muted); letter-spacing: 1px; }
 
+.repo-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.repo-link a {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.repo-link a:hover {
+  color: var(--text-primary);
+}
+
+.app {
+  position: relative;
+}
+
 .columns {
 display: grid;
 grid-template-columns: 1fr 1fr;
@@ -721,7 +749,7 @@ transition: border-color 0.2s;
 .tier-input:focus { border-color: var(--accent); }
 .tier-input::-webkit-outer-spin-button,
 .tier-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.tier-input { -moz-appearance: textfield; }
+.tier-input { -moz-appearance: textfield; appearance: textfield; }
 
 .tier-result {
 font-family: 'Chakra Petch', sans-serif;
