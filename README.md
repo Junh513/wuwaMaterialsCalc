@@ -16,7 +16,7 @@ This project uses **encore.moe API v2** for all game data, including characters,
 This is a single static HTML file with no build step or dependencies required.
 
 1. Clone or download this repository.
-2. Open `wuwa-materials.html` in any browser.
+2. Open `index.html` in any browser.
 3. Select a character and/or weapon to view their materials.
 4. Adjust the level and skill sliders to match your leveling goals.
 
